@@ -79,10 +79,10 @@ def convertir_a_excel(df):
     
     videos_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Video1', 'Video2', 'Video3']].copy()
 
-    usuarios_sin_ingreso = df[['username', 'firstname', 'lastname', 'email', 'country']].copy()
+    usuarios_sin_ingreso = df[['username', 'firstname', 'lastname', 'email', 'country', 'sin_ingreso']].copy()
     usuarios_sin_ingreso = usuarios_sin_ingreso[usuarios_sin_ingreso['sin_ingreso']==True]
     
-    calificaciones_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Calificaicon_max']].copy()
+    calificaciones_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Calificación_max']].copy()
     
     
     with pd.ExcelWriter(output) as writer:
@@ -122,7 +122,7 @@ if uploaded_file:
     
     
     paises_options = list(df['country'].unique())
-    selection = st.pills("Países", paises_options, selection_mode="multi")
+    selection = st.pills("Seleccione los Países", paises_options, selection_mode="multi")
     
     if len(selection)>0:
         statistics_df = df[df['country'].isin(selection)]
