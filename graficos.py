@@ -9,6 +9,56 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
+def procesar_columna_encuesta_seleccion_simple(columna:list) -> pd.DataFrame:
+    
+    clean_columna = [x  for x in columna if type(x)== str]
+    
+    clean_columna = set(clean_columna) 
+    
+    # Obtener las categorias
+    categorias = {x:0 for x in clean_columna}
+        
+    # Recorrer los registros
+    for row in columna:
+        if type(row)== str:
+            categorias[row] +=1
+            
+    
+    data = pd.DataFrame({"Categoria":k, "Conteo":v} for k,v in categorias.items())             
+
+    return data
+
+
+def procesar_columna_encuesta_seleccion_multiple(columna:list, sep:str) -> pd.DataFrame:
+    
+    # columna = list(df[df.columns[15]])
+    
+    clean_columna = [x  for x in columna if type(x)== str]
+    
+    clean_columna = set(clean_columna) 
+    
+    # Obtener las categorias
+    categorias = {y:0 for x in clean_columna for y in x.split(sep)}
+        
+    # Recorrer los registros
+    for row in clean_columna:
+        valores = row.split(sep)
+        for valor in valores:
+            categorias[valor] +=1
+            
+    
+    data = pd.DataFrame({"Categoria":k, "Conteo":v} for k,v in categorias.items())             
+
+    return data
+
+
+def procesar_columna_encuesta_texto(columna:list)-> str:    
+   
+    clean_columna = [f"- {str(x).strip()}"  for x in columna if type(x)== str]
+    
+    return "\n\n".join(clean_columna)
+
+
 def generar_grafico(data: pd.DataFrame, title:str):
     # Simulación de tus datos
     data['Porcentaje'] = data['Conteo'] / data['Conteo'].sum() * 100
@@ -20,7 +70,7 @@ def generar_grafico(data: pd.DataFrame, title:str):
     fig, ax = plt.subplots(figsize=(8, 4))
 
     # Barras
-    bars = ax.barh(data['Categoría'], data['Conteo'], color='gray')
+    bars = ax.barh(data['Categoria'], data['Conteo'], color='gray')
 
     # Etiquetas circulares con número y porcentaje
     for bar, count, pct in zip(bars, data['Conteo'], data['Porcentaje']):

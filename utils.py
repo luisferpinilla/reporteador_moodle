@@ -7,7 +7,7 @@ Created on Tue Jul 22 18:43:47 2025
 
 import zipfile
 import pandas as pd
-
+from io import BytesIO
 
 def obtener_archivos(file:str)->list:
 
@@ -202,9 +202,43 @@ def obtener_data(ruta_zip:str)->pd.DataFrame:
     
     # convertir email en index
     users_df.set_index('email', inplace=True)
-    
-    # 
+   
     
     return users_df
+
+
+def convertir_a_excel(df):
+    output = BytesIO()
+    
+    usuarios_registrados_df = df[['username', 'firstname', 'lastname', 'email', 'country']].copy()
+    
+    evaluacion_superada_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'EvaluacionSuperada']].copy()
+    
+    evaluacion_superada_df = evaluacion_superada_df[evaluacion_superada_df['EvaluacionSuperada']==True]
+    
+    evaluacion_no_superada_df = evaluacion_superada_df[evaluacion_superada_df['EvaluacionSuperada']==False]
+    
+    videos_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Video1', 'Video2', 'Video3']].copy()
+
+    usuarios_sin_ingreso = df[['username', 'firstname', 'lastname', 'email', 'country', 'sin_ingreso']].copy()
+    usuarios_sin_ingreso = usuarios_sin_ingreso[usuarios_sin_ingreso['sin_ingreso']==True].drop(columns=['sin_ingreso'])
+    
+    # capacidation_no_finalizada_df = df.copy()
+    
+    calificaciones_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Calificación_max']].copy()
+    calificaciones_df = calificaciones_df[~calificaciones_df['Calificación_max'].isna()].rename(columns={'Calificación_max':'Calificación'}) 
+    
+    
+    with pd.ExcelWriter(output) as writer:
+        usuarios_registrados_df.to_excel(writer, sheet_name='Usuarios Registrados', index=False)
+        evaluacion_superada_df.to_excel(writer, sheet_name='Evaluación Superada', index=False)
+        evaluacion_no_superada_df.to_excel(writer, sheet_name='Evaluación No Superada', index=False)
+        videos_df.to_excel(writer, sheet_name='Videos', index=False)
+        usuarios_sin_ingreso.to_excel(writer, sheet_name='Usuarios Sin Ingreso', index=False)
+        calificaciones_df.to_excel(writer, sheet_name='Calificaciones', index=False)
+        
+    output.seek(0)
+    
+    return output
     
  
