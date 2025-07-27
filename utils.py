@@ -32,7 +32,7 @@ def obtener_usuarios_sin_ingreso(ruta_zip:str)->list:
     
     # Buscar todos los archivos que aplican
     ruta = 'datos-informes-paises/usuarios-sin-ingreso/'
-    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta)]
+    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta) and str(x).endswith("xlsx")]
     
     # Obtener los dataframe de cada archivo
     datos = list()
