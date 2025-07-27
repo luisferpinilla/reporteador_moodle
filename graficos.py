@@ -38,13 +38,13 @@ def procesar_columna_encuesta_seleccion_multiple(columna:list, sep:str) -> pd.Da
     clean_columna = set(clean_columna) 
     
     # Obtener las categorias
-    categorias = {y:0 for x in clean_columna for y in x.split(sep)}
+    categorias = {y.strip().upper():0 for x in clean_columna for y in x.split(sep)}
         
     # Recorrer los registros
     for row in clean_columna:
         valores = row.split(sep)
         for valor in valores:
-            categorias[valor] +=1
+            categorias[valor.strip().upper()] +=1
             
     
     data = pd.DataFrame({"Categoria":k, "Conteo":v} for k,v in categorias.items())             
