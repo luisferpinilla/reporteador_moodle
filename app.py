@@ -22,13 +22,15 @@ def fetch_and_clean_data(uploaded_file) -> pd.DataFrame:
 
 uploaded_file = st.file_uploader("Choose a file")
 
+# uploaded_file = r"C:\Users\luisf\Downloads\datos-informes-paises (1).zip"
+
 if uploaded_file:
     
     df = fetch_and_clean_data(uploaded_file).reset_index()
     
-    # st.dataframe(df)
+    # df.to_excel('borrame.xlsx', index=False)
     
-
+    # st.dataframe(df)
     
     paises_options = list(df['country'].unique())
     selection = st.pills("Seleccione los Países", paises_options, selection_mode="multi")
@@ -90,7 +92,7 @@ if uploaded_file:
         st.metric(label ='Usuarios sin Ingreso', value = data)
         
     with columns_metric_2:
-        data = statistics_df[statistics_df['Evaluación']!='No finalizado'].shape[0]        
+        data = statistics_df[statistics_df['Evaluación']=='No finalizado'].shape[0]        
         st.metric(label ='Capacitación No Finalizada', value = data)
         
     st.title(body="Encuesta")
