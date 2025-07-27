@@ -35,11 +35,12 @@ def procesar_columna_encuesta_seleccion_multiple(columna:list, sep:str) -> pd.Da
         
             
     for row in columna:
-        for categoria in row.split('   '):
-            if categoria in categorias.keys():
-                categorias[categoria] += 1
-            else:
-                categorias[categoria] = 1
+        if type(row)==str:
+            for categoria in row.split('   '):
+                if categoria in categorias.keys():
+                    categorias[categoria] += 1
+                else:
+                    categorias[categoria] = 1
             
     data = pd.DataFrame({"Categoria":k, "Conteo":v} for k,v in categorias.items())             
 
