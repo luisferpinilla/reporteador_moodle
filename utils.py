@@ -73,7 +73,7 @@ def obtener_encuestas_usuario(ruta_zip:str)->pd.DataFrame:
     return df
 
 
-def estatus_aprobacion(conteoIntentos:int, calificacion_max:int,  maxConteo=3, umbral_aprobacion=7)->bool:
+def estatus_aprobacion(conteoIntentos:int, calificacion_max:float,  maxConteo=3, umbral_aprobacion=7)->bool:
     
     if calificacion_max >= umbral_aprobacion:
         return True
@@ -116,8 +116,9 @@ def obtener_evaluaciones(ruta_zip:str)->pd.DataFrame:
     # Convertir en tabla no indexada
     df.reset_index(inplace=True)
     
-    df['EvaluacionSuperada'] = df['Calificación_max'].apply(lambda x: estatus_aprobacion(conteoIntentos=x['Calificación_count'], 
-                                                                                         calificacion_max=x['Calificación_max']))
+    df['EvaluacionSuperada'] = df.apply(lambda x: estatus_aprobacion(conteoIntentos=x['Calificación_count'], 
+                                                                                         calificacion_max=x['Calificación_max']),
+                                        axis=1)
     
     return df
 
