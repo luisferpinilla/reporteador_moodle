@@ -109,7 +109,9 @@ def obtener_evaluaciones(ruta_zip:str)->pd.DataFrame:
     
     df['Calificación'] = df['Calificación'].apply(lambda x: float(str(x).replace(",", ".")))
     
-    df = df.groupby('email').agg({'Calificación': ['count', 'max']})
+    df['Califiacion_group'] = df['Calificación'].apply(lambda x: [x])
+    
+    df = df.groupby('email').agg({'Calificación': ['count', 'max'], 'Califiacion_group':['sum']})
     
     df.columns = ['_'.join(col) for col in df.columns]
     
@@ -216,8 +218,7 @@ def obtener_data(ruta_zip:str)->pd.DataFrame:
     users_df['city'] = users_df['city'].apply(lambda x: str(x).upper())
     
     # convertir email en index
-    users_df.set_index('email', inplace=True)
-   
+    users_df.set_index('email', inplace=True)   
     
     return users_df
 
@@ -237,11 +238,24 @@ def convertir_a_excel(df):
 
     usuarios_sin_ingreso = df[['username', 'firstname', 'lastname', 'email', 'country', 'sin_ingreso']].copy()
     usuarios_sin_ingreso = usuarios_sin_ingreso[usuarios_sin_ingreso['sin_ingreso']==True].drop(columns=['sin_ingreso'])
+   
+   
+    calificaciones_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Califiacion_group_sum']].copy()
+    calificaciones_df = calificaciones_df[~calificaciones_df['Califiacion_group_sum'].isna()].rename(columns={'Califiacion_group_sum':'Calificación'}) 
     
-    # capacidation_no_finalizada_df = df.copy()
+    max_intentos = max([len(x) for x in calificaciones_df['Calificación']])
+
+    for i in range(max_intentos):
+        calificaciones_df[f'intento {i+1}'] = calificaciones_df['Calificación'].apply(lambda x: x[i] if i < len(x) else None)
+        
     
-    calificaciones_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Calificación_max']].copy()
-    calificaciones_df = calificaciones_df[~calificaciones_df['Calificación_max'].isna()].rename(columns={'Calificación_max':'Calificación'}) 
+    calificaciones_df = pd.melt(frame=calificaciones_df,
+                                id_vars=['username', 'firstname', 'lastname', 'email', 'country'],
+                                value_vars=[f'intento {i+1}' for i in range(max_intentos)])
+    
+    calificaciones_df = calificaciones_df[~calificaciones_df['value'].isna()]
+    
+    calificaciones_df = calificaciones_df.sort_values(["firstname", "value"]).rename(columns={'value':'Calificación'}).drop(columns=["variable"])
     
     
     with pd.ExcelWriter(output) as writer:
