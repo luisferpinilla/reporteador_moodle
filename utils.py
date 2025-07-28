@@ -228,18 +228,38 @@ def convertir_a_excel(df):
     
     usuarios_registrados_df = df[['username', 'firstname', 'lastname', 'email', 'country']].copy()
     
+    
     evaluacion_superada_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'EvaluacionSuperada']].copy()
     
     evaluacion_superada_df = evaluacion_superada_df[evaluacion_superada_df['EvaluacionSuperada']==True]
     
     evaluacion_no_superada_df = evaluacion_superada_df[evaluacion_superada_df['EvaluacionSuperada']==False]
     
+    
     videos_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Video1', 'Video2', 'Video3']].copy()
+
 
     usuarios_sin_ingreso = df[['username', 'firstname', 'lastname', 'email', 'country', 'sin_ingreso']].copy()
     usuarios_sin_ingreso = usuarios_sin_ingreso[usuarios_sin_ingreso['sin_ingreso']==True].drop(columns=['sin_ingreso'])
+    
+    
+    capacitacion_no_finalizada_df = df[['username', 
+                                        'firstname', 
+                                        'lastname', 
+                                        'email',                                        
+                                        'country',
+                                        'sin_ingreso',
+                                        'Video1', 'Video2', 'Video3', 
+                                        'EvaluacionSuperada']].copy()
    
+    capacitacion_no_finalizada_df['sin ingreso'] = capacitacion_no_finalizada_df['sin_ingreso'].apply(lambda x: 'O' if x else 'X')
+    
+    capacitacion_no_finalizada_df['Videos no completos'] = capacitacion_no_finalizada_df.apply(lambda x: 'O' if x['Video1']=='Finalizado' and x['Video2']=='Finalizado' and x['Video3']=='Finalizado' else 'X', axis=1)
    
+    capacitacion_no_finalizada_df['Evaluación no superada'] = capacitacion_no_finalizada_df['EvaluacionSuperada'].apply(lambda x: 'O' if x==True else 'X')
+   
+    capacitacion_no_finalizada_df.drop(columns=['Video1', 'Video2', 'Video3', 'sin_ingreso', 'EvaluacionSuperada'], inplace=True)
+    
     calificaciones_df = df[['username', 'firstname', 'lastname', 'email', 'country', 'Califiacion_group_sum']].copy()
     calificaciones_df = calificaciones_df[~calificaciones_df['Califiacion_group_sum'].isna()].rename(columns={'Califiacion_group_sum':'Calificación'}) 
     
@@ -247,15 +267,17 @@ def convertir_a_excel(df):
 
     for i in range(max_intentos):
         calificaciones_df[f'intento {i+1}'] = calificaciones_df['Calificación'].apply(lambda x: x[i] if i < len(x) else None)
-        
     
     calificaciones_df = pd.melt(frame=calificaciones_df,
                                 id_vars=['username', 'firstname', 'lastname', 'email', 'country'],
                                 value_vars=[f'intento {i+1}' for i in range(max_intentos)])
-    
+   
     calificaciones_df = calificaciones_df[~calificaciones_df['value'].isna()]
-    
+   
     calificaciones_df = calificaciones_df.sort_values(["firstname", "value"]).rename(columns={'value':'Calificación'}).drop(columns=["variable"])
+
+
+
     
     
     with pd.ExcelWriter(output) as writer:
@@ -264,6 +286,7 @@ def convertir_a_excel(df):
         evaluacion_no_superada_df.to_excel(writer, sheet_name='Evaluación No Superada', index=False)
         videos_df.to_excel(writer, sheet_name='Videos', index=False)
         usuarios_sin_ingreso.to_excel(writer, sheet_name='Usuarios Sin Ingreso', index=False)
+        capacitacion_no_finalizada_df.to_excel(writer, sheet_name="Capacitación No Finalizada", index=False)
         calificaciones_df.to_excel(writer, sheet_name='Calificaciones', index=False)
         
     output.seek(0)
