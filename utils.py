@@ -9,6 +9,7 @@ import zipfile
 import pandas as pd
 from io import BytesIO
 
+
 def obtener_archivos(file:str)->list:
 
     with zipfile.ZipFile(file, 'r') as zip_ref:
@@ -53,13 +54,15 @@ def obtener_usuarios_sin_ingreso(ruta_zip:str)->list:
 def obtener_encuestas_usuario(ruta_zip:str)->pd.DataFrame:
     # Buscar todos los archivos que aplican
     ruta = 'datos-informes-paises/encuesta/'
-    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta)]
+    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta) and str(x).endswith("xlsx")]
+
+
 
     # Obtener los dataframe de cada archivo
     datos = list()
     
     with zipfile.ZipFile(ruta_zip, 'r') as zip_ref:
-        for nombre_archivo in archivos:
+        for nombre_archivo in archivos:            
             with zip_ref.open(nombre_archivo) as archivo_excel:
                 df = pd.read_excel(archivo_excel)
                 datos.append(df)
@@ -88,7 +91,7 @@ def estatus_aprobacion(conteoIntentos:int, calificacion_max:float,  maxConteo=3,
 def obtener_evaluaciones(ruta_zip:str)->pd.DataFrame:
     # Buscar todos los archivos que aplican
     ruta = 'datos-informes-paises/evaluaciones/'
-    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta)]
+    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta) and str(x).endswith("xlsx")]
     
     # Obtener los dataframe de cada archivo
     datos = list()
@@ -128,7 +131,7 @@ def obtener_evaluaciones(ruta_zip:str)->pd.DataFrame:
 def obtener_progreso(ruta_zip:str)->pd.DataFrame:
     # Buscar todos los archivos que aplican
     ruta = 'datos-informes-paises/actividades/'
-    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta)]
+    archivos = [x for x in obtener_archivos(ruta_zip) if str(x).startswith(ruta) and str(x).endswith("csv")]
     
     # Obtener los dataframe de cada archivo
     datos = list()
